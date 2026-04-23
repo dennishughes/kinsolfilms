@@ -1,0 +1,3 @@
+{
+  "query": "query GetEAMSettings { eamSettingsPage { eamSettingsGroup { siteTitle siteLogo { node { sourceUrl } } heroTitle heroText pageContent { __typename ... on EamSettingsGroupPageContentHomepageLayout { pageTitle heroTitle heroText heroButtonTitle heroButtonUrl } ... on EamSettingsGroupPageContentAboutLayout { pageTitle heroTitle heroText ourMissionTitle ourMissionText ourTeamTitle awardsRecognitionTile getInTouchContent } ... on EamSettingsGroupPageContentWorkLayout { pageTitle heroTitle heroText } ... on EamSettingsGroupPageContentServicesLayout { pageTitle heroTitle heroText } } } } }"
+}
