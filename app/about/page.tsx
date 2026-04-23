@@ -40,7 +40,7 @@ export default async function AboutPage() {
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl md:text-7xl font-light mb-8">
-              {aboutSettings?.heroTitle || "About Empress Avenue Media"}
+              {aboutSettings?.heroTitle || "About Kinsol Films"}
             </h1>
             <p className="text-xl text-slate-200 leading-relaxed font-light">
               {aboutSettings?.heroText || "We are a film production company dedicated to creating meaningful media that explores important social issues and tells compelling human stories."}
@@ -68,7 +68,7 @@ export default async function AboutPage() {
               ) : (
                 <>
                   <p className="text-slate-700 mb-6">
-                    At Empress Avenue Media, we believe in the power of film to create social change. Our productions focus
+                    At Kinsol Films, we believe in the power of film to create social change. Our productions focus
                     on underrepresented voices and critical social issues, bringing awareness and fostering dialogue through
                     compelling storytelling.
                   </p>
@@ -171,10 +171,10 @@ export default async function AboutPage() {
                   <a href="tel:1-250-709-7095" className="hover:text-white transition-colors">1-250-709-7095</a>
                 </p>
                 <p>
-                  <a href="mailto:info@empressave.com" className="hover:text-white transition-colors">info@empressave.com</a>
+                  <a href="mailto:info@kinsolfilms.ca" className="hover:text-white transition-colors">info@kinsolfilms.ca</a>
                 </p>
                 <p className="pt-6 border-t border-slate-700 leading-relaxed">
-                  Empress Avenue Media is named after its location on Empress Avenue in
+                  Kinsol Films is named after the Kinsol Trestle near its location in
                   Cobble Hill, south of Duncan, BC on Vancouver Island in the beautiful Cowichan Valley.
                 </p>
               </div>

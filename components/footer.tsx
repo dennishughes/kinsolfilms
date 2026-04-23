@@ -57,7 +57,7 @@ export async function Footer() {
                     </div>
                 </div>
 
-                <div className="text-center text-slate-400 text-sm">© 2025 Empress Avenue Media. All rights reserved.</div>
+                <div className="text-center text-slate-400 text-sm">© 2026 Kinsol Films. All rights reserved.</div>
             </div>
         </footer>
     )

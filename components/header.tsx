@@ -35,13 +35,13 @@ export function Header({ siteTitle, siteLogo }: HeaderProps) {
                     <Link href="/" className="flex items-center space-x-3 relative z-50" onClick={closeMenu}>
                         <Image
                             src={siteLogo || "/empress-avenue-logo.png"}
-                            alt={siteTitle || "Empress Avenue Media"}
-                            width={48}
+                            alt={siteTitle || "Kinsol Films"}
+                            width={248}
                             height={48}
                             className="object-contain"
                         />
                         <span className="text-xl font-light tracking-wide text-white">
-                            {siteTitle ? siteTitle.toLowerCase() : "empress avenue media"}
+                            {siteTitle ? siteTitle.toLowerCase() : "kinsol films"}
                         </span>
                     </Link>
 

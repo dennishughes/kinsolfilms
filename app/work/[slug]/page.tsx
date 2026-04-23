@@ -293,7 +293,7 @@ export default async function FilmDetailPage({ params }: { params: { slug: strin
                       <div className="w-12 h-12 bg-[#0b101b] rounded-full flex items-center justify-center p-1 shadow-lg border border-slate-700/30 group-hover:border-slate-500 transition-colors overflow-hidden">
                         <Image
                           src={settings?.siteLogo || "/empress-avenue-logo.png"}
-                          alt={settings?.siteTitle || "Empress Avenue Media"}
+                          alt={settings?.siteTitle || "Kinsol Films"}
                           width={48}
                           height={48}
                           className="w-full h-full object-contain"

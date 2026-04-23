@@ -84,7 +84,7 @@ export default async function HomePage() {
         <div className="container relative mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl md:text-7xl font-light mb-6">
-              {homepageSettings?.heroTitle || "Empress Avenue Media"}
+              {homepageSettings?.heroTitle || "Kinsol Films"}
             </h1>
             <p className="text-xl md:text-2xl text-slate-200 leading-relaxed font-light mb-8">
               {homepageSettings?.heroText || "Making meaningful media that explores critical social issues and tells compelling human stories."}

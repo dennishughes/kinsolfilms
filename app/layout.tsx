@@ -16,7 +16,7 @@ const cormorant = Cormorant({
 })
 
 export const metadata: Metadata = {
-  title: "Empress Avenue Media - Making Meaningful Media",
+  title: "Kinsol Films - Making Meaningful Media",
   description: "Film production company creating impactful documentaries and narrative films.",
     generator: 'v0.dev'
 }

@@ -4,7 +4,7 @@ import { Resend } from "resend"
 import { z } from "zod"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const contactEmail = process.env.CONTACT_EMAIL || "info@empressave.com"
+const contactEmail = process.env.CONTACT_EMAIL || "info@kinsolfilms.ca"
 
 const subscribeSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -36,7 +36,7 @@ export async function subscribeAction(
 
     try {
         const data = await resend.emails.send({
-            from: "Empress Avenue Media Website <onboarding@resend.dev>", // Note: requires verification of domain or sending to verified email
+            from: "Kinsol Films Website <onboarding@resend.dev>", // Note: requires verification of domain or sending to verified email
             to: contactEmail,
             subject: "New Newsletter Subscriber!",
             text: `You have a new subscriber from the website footer form.\n\nEmail: ${email}\n\nPlease add them to your mailing list.`,

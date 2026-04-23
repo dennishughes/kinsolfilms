@@ -1,4 +1,4 @@
-const GRAPHQL_ENDPOINT = "https://eam.devden.ca/graphql"
+const GRAPHQL_ENDPOINT = "https://kinsolfilms.empressave.com/graphql"
 
 export interface CrewMember {
   name: string
@@ -126,6 +126,11 @@ const EAM_SETTINGS_QUERY = `
   }
 `
 
+function replaceBranding(text: string | null | undefined): string | undefined {
+  if (!text) return undefined
+  return text.replace(/Empress Avenue Media/gi, "Kinsol Films")
+}
+
 export async function fetchEAMSettings(): Promise<EAMSettings | null> {
   try {
     const response = await fetch(GRAPHQL_ENDPOINT, {
@@ -154,7 +159,7 @@ export async function fetchEAMSettings(): Promise<EAMSettings | null> {
     if (!group) return null
 
     const settings: EAMSettings = {
-      siteTitle: group.siteTitle,
+      siteTitle: replaceBranding(group.siteTitle),
       siteLogo: group.siteLogo?.node?.sourceUrl,
       socialLinks: group.socialLinks || [],
     }
@@ -163,40 +168,40 @@ export async function fetchEAMSettings(): Promise<EAMSettings | null> {
       for (const layout of group.pageContent) {
         if (layout.__typename === "EamSettingsGroupPageContentHomepageLayout") {
           settings.homepage = {
-            pageTitle: layout.pageTitle,
-            heroTitle: layout.heroTitle,
-            heroText: layout.heroText,
-            heroButtonTitle: layout.heroButtonTitle,
+            pageTitle: replaceBranding(layout.pageTitle),
+            heroTitle: replaceBranding(layout.heroTitle),
+            heroText: replaceBranding(layout.heroText),
+            heroButtonTitle: replaceBranding(layout.heroButtonTitle),
             heroButtonUrl: layout.heroButtonUrl,
           }
         } else if (layout.__typename === "EamSettingsGroupPageContentAboutLayout") {
           settings.about = {
-            pageTitle: layout.pageTitle,
-            heroTitle: layout.heroTitle,
-            heroText: layout.heroText,
-            ourMissionTitle: layout.ourMissionTitle,
-            ourMissionText: layout.ourMissionText,
+            pageTitle: replaceBranding(layout.pageTitle),
+            heroTitle: replaceBranding(layout.heroTitle),
+            heroText: replaceBranding(layout.heroText),
+            ourMissionTitle: replaceBranding(layout.ourMissionTitle),
+            ourMissionText: replaceBranding(layout.ourMissionText),
             ourMissionImage: layout.ourMissionImage?.node?.sourceUrl,
-            ourTeamTitle: layout.ourTeamTitle,
-            awardsRecognitionTile: layout.awardsRecognitionTile,
-            getInTouchContent: layout.getInTouchContent,
+            ourTeamTitle: replaceBranding(layout.ourTeamTitle),
+            awardsRecognitionTile: replaceBranding(layout.awardsRecognitionTile),
+            getInTouchContent: replaceBranding(layout.getInTouchContent),
             awardsRecognition: layout.awardsRecognition?.map((a: any) => ({
-              award: a.award,
+              award: replaceBranding(a.award),
               awardImage: a.awardImage?.node?.sourceUrl,
-              type: a.type
+              type: replaceBranding(a.type)
             })),
           }
         } else if (layout.__typename === "EamSettingsGroupPageContentWorkLayout") {
           settings.work = {
-            pageTitle: layout.pageTitle,
-            heroTitle: layout.heroTitle,
-            heroText: layout.heroText,
+            pageTitle: replaceBranding(layout.pageTitle),
+            heroTitle: replaceBranding(layout.heroTitle),
+            heroText: replaceBranding(layout.heroText),
           }
         } else if (layout.__typename === "EamSettingsGroupPageContentServicesLayout") {
           settings.services = {
-            pageTitle: layout.pageTitle,
-            heroTitle: layout.heroTitle,
-            heroText: layout.heroText,
+            pageTitle: replaceBranding(layout.pageTitle),
+            heroTitle: replaceBranding(layout.heroTitle),
+            heroText: replaceBranding(layout.heroText),
           }
         }
       }
