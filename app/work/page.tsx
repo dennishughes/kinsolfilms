@@ -1,360 +1,485 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowLeft, Clock, Film, ExternalLink, Calendar, Play, Globe } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import {
-    fetchProductions,
-    getOurProductions,
-    getCollaborations,
-    getInProgressProductions,
-    getComingSoonProductions,
-    getUpcomingEvents,
-    fetchWorks,
-    fetchEAMSettings,
-    type Production,
-} from "@/lib/graphql"
-import { WorkGallerySection } from "@/components/work-gallery-section"
-import { WorkTabNav, type WorkSection } from "@/components/work-tab-nav"
-import { ArrowRight } from "lucide-react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { notFound } from "next/navigation"
+import { fetchProductionBySlug, fetchProductions, fetchEAMSettings } from "@/lib/graphql"
+import { VideoModal } from "@/components/video-modal"
+import { ImageGalleryModal } from "@/components/image-gallery-modal"
+import { ExpandableList } from "@/components/expandable-list"
+import { Star, Trophy } from "lucide-react"
 
-export const revalidate = 60
+export const revalidate = 0
 
-interface WorkPageProps {
-    searchParams: Promise<{ section?: string }>
+// Generate static params for all productions
+export async function generateStaticParams() {
+    const productions = await fetchProductions()
+    return productions.map((production) => ({
+        slug: production.slug,
+    }))
 }
 
-const PREVIEW_COUNT = 3 // cards shown per section in "all" view
-
-export default async function WorkPage({ searchParams }: WorkPageProps) {
-    const { section } = await searchParams
-    const activeSection = (section || "all") as WorkSection
-    const isAll = activeSection === "all"
-
-    const needsDesign = activeSection === "design-works" // "all" skips design fetch
-    const needsProductions = activeSection !== "design-works"
-
-    const [allProductions, worksData, settings] = await Promise.all([
-        needsProductions ? fetchProductions() : Promise.resolve([]),
-        needsDesign ? fetchWorks() : Promise.resolve(null),
-        fetchEAMSettings(),
+export default async function FilmDetailPage({ params }: { params: { slug: string } }) {
+    const [film, settings] = await Promise.all([
+        fetchProductionBySlug(params.slug),
+        fetchEAMSettings()
     ])
+    console.log("DEBUG CREW:", JSON.stringify(film?.crew, null, 2))
+    console.log("DEBUG CAST:", JSON.stringify(film?.cast, null, 2))
 
-    const workSettings = settings?.work
-
-    // Derived lists
-    const ourProductions = (isAll || activeSection === "our-productions") ? getOurProductions(allProductions) : []
-    const comingSoon = (isAll || activeSection === "coming-soon") ? getComingSoonProductions(allProductions) : []
-    const upcomingEvents = (isAll || activeSection === "coming-soon") ? getUpcomingEvents(allProductions) : []
-    const inProgress = (isAll || activeSection === "in-progress") ? getInProgressProductions(allProductions) : []
-    const collaborations = (isAll || activeSection === "collaborations") ? getCollaborations(allProductions) : []
-
-    // In "all" mode each section is capped to PREVIEW_COUNT; in section mode show all
-    const displayProductions = isAll ? ourProductions.slice(0, PREVIEW_COUNT) : ourProductions
-    const displayComingSoon = isAll ? comingSoon.slice(0, PREVIEW_COUNT) : comingSoon
-    const displayInProgress = isAll ? inProgress.slice(0, PREVIEW_COUNT) : inProgress
-    const displayCollabs = isAll ? collaborations.slice(0, PREVIEW_COUNT) : collaborations
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
-    const formatType = (p: Production) => {
-        const type = p.filmType || "Feature"
-        const year = p.releaseYear || ""
-        return year ? `${type} • ${year}` : type
-    }
-    const getStatusDisplay = (p: Production) => {
-        const s = (p.status || "").toLowerCase()
-        if (s === "in development") return "in development"
-        if (s === "in pre-production") return "in pre-production"
-        if (s === "in production") return "in production"
-        if (s === "in post") return "in post"
-        return p.status?.toLowerCase() || "in progress"
+    if (!film) {
+        notFound()
     }
 
-    // ── Section header helper (badge + optional "see all" link) ──────────────
-    const SectionHeader = ({
-        label,
-        badgeBg,
-        total,
-        sectionKey,
-    }: {
-        label: string
-        badgeBg: string
-        total?: number
-        sectionKey: WorkSection
-    }) => (
-        <div className="flex items-end justify-between mb-6">
-            <div className={`inline-block ${badgeBg} text-white px-4 py-1 pt-3 text-sm right-top-br`}>{label}</div>
-            {isAll && total !== undefined && total > PREVIEW_COUNT && (
-                <Link
-                    href={`/work?section=${sectionKey}`}
-                    className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors group"
-                >
-                    see all {total}
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-            )}
-        </div>
-    )
+    // Helper to safely format title for display
+    const displayCrewTitle = (c: { title?: string | string[] | { name?: string } | null }): string => {
+        if (!c || !c.title) return ""
+        if (Array.isArray(c.title)) return c.title.filter(Boolean).map(t => typeof t === "object" ? (t as any).name : t).join(", ")
+        if (typeof c.title === "string") return c.title
+        if (typeof c.title === "object" && typeof (c.title as any).name === "string") return ((c.title as any).name || "")
+        return ""
+    }
 
-    // ── Poster card shared UI ─────────────────────────────────────────────────
-    const PosterSlot = ({
-        href,
-        sourceUrl,
-        altText,
-        light = true,
-    }: {
-        href: string
-        sourceUrl?: string | null
-        altText?: string
-        light?: boolean
-    }) => (
-        <Link
-            href={href}
-            className={`block w-full sm:w-32 md:w-36 lg:w-40 aspect-[2/3] ${light ? "bg-slate-100" : "bg-slate-900"} flex items-center justify-center border-b sm:border-b-0 sm:border-r ${light ? "border-slate-200" : "border-slate-700"} flex-shrink-0 relative overflow-hidden group`}
-        >
-            {sourceUrl ? (
-                <Image src={sourceUrl} alt={altText || ""} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-            ) : (
-                <div className={`absolute inset-0 flex items-center justify-center ${light ? "text-slate-400" : "text-slate-500"} text-sm p-4 text-center`}>[No Poster]</div>
-            )}
-        </Link>
-    )
+    // Helper to safely get title as lowercase string
+    const getCrewTitle = (c: { title?: string | string[] | { name?: string } | null }): string => {
+        if (Array.isArray(c.title)) return c.title.join(", ").toLowerCase()
+        if (typeof c.title === "string") return c.title.toLowerCase()
+        if (c.title && typeof c.title === "object" && typeof (c.title as any).name === "string") return ((c.title as any).name || "").toLowerCase()
+        return ""
+    }
+
+    // Helper to get director from crew
+    const director = film.crew?.find((c) => getCrewTitle(c) === "director")?.name
+    const producer = film.crew?.find((c) => getCrewTitle(c) === "producer" || getCrewTitle(c) === "executive producer")?.name
+    const writer = film.crew?.find((c) => getCrewTitle(c) === "writer")?.name
+
+    // Format duration
+    const formatDuration = (minutes?: number) => {
+        if (!minutes) return null
+        return `${minutes} minutes`
+    }
+
+    // Get genres display
+    const genresDisplay = film.genres?.join(", ") || film.filmType
+
+    // Filter coming soon events to only include future events
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const upcomingEvents = film.comingSoon?.filter(event => {
+        if (!event.datetime) return true // Keep events without a specific date
+        const eventDate = new Date(event.datetime)
+        return eventDate >= today
+    }) || []
+
+    // Build unified gallery starting with the poster
+    const allImages = []
+    if (film.poster) {
+        allImages.push(film.poster)
+    }
+    if (film.imageGallery && film.imageGallery.length > 0) {
+        allImages.push(...film.imageGallery)
+    }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
+        <div className="min-h-screen bg-slate-50">
+            {/* Header */}
             <Header siteTitle={settings?.siteTitle} siteLogo={settings?.siteLogo} />
 
-            {/* Hero */}
-            <section className="relative py-20 text-white overflow-hidden flex-shrink-0">
+            {/* Production Hero - Static Wave Background */}
+            <section className="relative py-12 text-white overflow-hidden">
+                {/* Background Image */}
                 <div className="absolute inset-0">
-                    <Image src="/hero-bg-cinematic.png" alt="Abstract wave background" fill className="object-cover" priority />
+                    <Image
+                        src="/hero-bg-cinematic.png"
+                        alt="Abstract wave background"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    {/* Subtle overlay so text remains readable */}
                     <div className="absolute inset-0 bg-slate-900/60" />
                 </div>
+
                 <div className="container relative mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-5xl md:text-7xl font-light mb-8 text-transform: lowercase">
-                            {workSettings?.heroTitle || "Our Work"}
-                        </h1>
-                        <p className="text-xl text-slate-200 leading-relaxed font-light">
-                            {workSettings?.heroText || "A comprehensive collection of our original films, creative collaborations, and design portfolio."}
-                        </p>
+                        <Link href="/work" className="inline-flex items-center justify-center space-x-2 text-slate-300 hover:text-white transition-colors font-medium">
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Back to Work</span>
+                        </Link>
                     </div>
                 </div>
             </section>
 
-            {/* Sticky tab nav */}
-            <WorkTabNav activeSection={activeSection} />
+            {/* Production Details - Main Content */}
+            <section className="py-16 bg-white border-b border-slate-200">
+                <div className="container mx-auto px-6">
+                    <div className="grid lg:grid-cols-2 gap-12 items-start max-w-5xl mx-auto">
+                        {/* Poster moved down to main content area */}
+                        {allImages.length > 0 ? (
+                            <ImageGalleryModal
+                                images={allImages}
+                                title={film.title}
+                                displayMode="poster"
+                                priority={true}
+                            />
+                        ) : (
+                            <div className="relative aspect-[2/3] max-w-md mx-auto lg:mx-0 w-full object-cover rounded-lg shadow-lg bg-slate-200 flex items-center justify-center text-slate-400">
+                                [No Poster Available]
+                            </div>
+                        )}
 
-            {/* ── Collaborations ──────────────────────────────────────────── */}
-            {displayCollabs.length > 0 && (
-                <section id="collaborations" className="py-12 bg-white flex-shrink-0">
-                    <div className="container mx-auto px-6">
-                        <SectionHeader label="purely post" badgeBg="bg-slate-700" total={collaborations.length} sectionKey="collaborations" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-5">
-                            {displayCollabs.map((project) => (
-                                <div key={project.id} className="border border-slate-200 bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row h-full">
-                                    <PosterSlot href={`/work/${project.slug}`} sourceUrl={project.poster?.sourceUrl} altText={project.poster?.altText || project.title} />
-                                    <div className="p-4 lg:p-6 flex-1 flex flex-col">
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{project.title}</h3>
-                                        <p className="text-sm text-slate-500 mb-4">{formatType(project)}</p>
-                                        {project.contributions && project.contributions.length > 0 && (
-                                            <div className="mb-6 flex-1">
-                                                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Our Contributions</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {project.contributions.map((item, idx) => (
-                                                        <span key={idx} className="bg-slate-100 text-slate-700 px-2 py-1 text-xs rounded border border-slate-200">{item}</span>
-                                                    ))}
+                        {/* Film Info */}
+                        <div>
+                            <div className="flex flex-wrap items-center gap-3 mb-4">
+                                <Badge variant="secondary" className="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 text-sm font-medium">
+                                    {film.filmType || "Feature"}
+                                </Badge>
+                                {/* Status */}
+                                {film.status && (
+                                    <Badge variant="secondary" className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1 text-sm font-medium">
+                                        {film.status}
+                                    </Badge>
+                                )}
+                                {/* Collaboration Badge */}
+                                {film.collaboration && (
+                                    film.contributions && film.contributions.length > 0 ? (
+                                        <Link href="#contributions-section" className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                                            <Badge variant="secondary" className="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-1 text-sm font-medium flex items-center gap-2">
+                                                <div className="w-4 h-4 bg-[#0b101b] rounded-full flex items-center justify-center p-0.5 flex-shrink-0">
+                                                    <Image
+                                                        src={settings?.siteLogo || "/KinsolFilms_Logo_FullColour_Light.png"}
+                                                        alt=""
+                                                        width={12}
+                                                        height={12}
+                                                        className="object-contain"
+                                                    />
                                                 </div>
-                                            </div>
-                                        )}
-                                        <Link href={`/work/${project.slug}`} className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto">
-                                            View Details
+                                                Collaboration
+                                            </Badge>
                                         </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        {isAll && collaborations.length > PREVIEW_COUNT && (
-                            <Link href="/work?section=collaborations" className="mt-8 flex items-center justify-center gap-2 w-full py-3 border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 hover:border-slate-400 transition-colors">
-                                see all {collaborations.length} collaborations <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        )}
-                    </div>
-                </section>
-            )}
-
-            {/* ── Coming Soon ─────────────────────────────────────────────── */}
-            {displayComingSoon.length > 0 && (
-                <section id="coming-soon" className="py-12 bg-slate-800 flex-shrink-0">
-                    <div className="container mx-auto px-6">
-                        <SectionHeader label="coming soon" badgeBg="bg-slate-600" total={comingSoon.length} sectionKey="coming-soon" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-5">
-                            {displayComingSoon.map((project) => {
-                                const nextEvent = upcomingEvents.filter(e => e.production.id === project.id)[0]
-                                return (
-                                    <div key={project.id} className="border border-slate-700 bg-slate-800 hover:shadow-lg transition-shadow duration-300">
-                                        <div className="flex flex-col sm:flex-row h-full">
-                                            <PosterSlot href={`/work/${project.slug}`} sourceUrl={project.poster?.sourceUrl} altText={project.poster?.altText || project.title} light={false} />
-                                            <div className="flex-1 p-4 lg:p-5 flex flex-col">
-                                                <h3 className="text-xl font-bold text-white mb-1 line-clamp-2">{project.title}</h3>
-                                                <p className="text-sm text-slate-400 mb-3">{formatType(project)}</p>
-                                                {nextEvent && (
-                                                    <>
-                                                        <div className="text-lg font-light text-slate-300 mb-1">
-                                                            {nextEvent.parsedDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })}
-                                                        </div>
-                                                        {nextEvent.event.title && (
-                                                            nextEvent.event.titleLink
-                                                                ? <Link href={nextEvent.event.titleLink} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-300 hover:text-white underline mb-3 transition-colors self-start">{nextEvent.event.title}</Link>
-                                                                : <span className="text-sm text-slate-300 mb-3 capitalize">{nextEvent.event.title}</span>
-                                                        )}
-                                                    </>
-                                                )}
-                                                <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 mb-3">{project.logline || "Coming soon."}</p>
-                                                <Link href={`/work/${project.slug}`} className="text-sm text-slate-400 underline font-medium hover:text-white transition-colors self-start mt-auto">
-                                                    View Details
-                                                </Link>
+                                    ) : (
+                                        <Badge variant="secondary" className="bg-slate-100 text-slate-800 border border-slate-300 px-3 py-1 text-sm font-medium flex items-center gap-2">
+                                            <div className="w-4 h-4 bg-[#0b101b] rounded-full flex items-center justify-center p-0.5 flex-shrink-0">
+                                                <Image
+                                                    src={settings?.siteLogo || "/KinsolFilms_Logo_FullColour_Light.png"}
+                                                    alt=""
+                                                    width={12}
+                                                    height={12}
+                                                    className="object-contain"
+                                                />
                                             </div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        {isAll && comingSoon.length > PREVIEW_COUNT && (
-                            <Link href="/work?section=coming-soon" className="mt-8 flex items-center justify-center gap-2 w-full py-3 border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition-colors">
-                                see all {comingSoon.length} coming soon <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        )}
-                    </div>
-                </section>
-            )}
+                                            Collaboration
+                                        </Badge>
+                                    )
+                                )}
+                            </div>
 
-            {/* ── In Progress ─────────────────────────────────────────────── */}
-            {displayInProgress.length > 0 && (
-                <section id="in-progress" className="py-12 bg-slate-100 flex-shrink-0">
-                    <div className="container mx-auto px-6">
-                        <SectionHeader label="in progress" badgeBg="bg-amber-600" total={inProgress.length} sectionKey="in-progress" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-5">
-                            {displayInProgress.map((project) => (
-                                <div key={project.id}>
-                                    <div className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300 mb-2">
-                                        <div className="flex flex-col sm:flex-row h-full">
-                                            <Link href={`/work/${project.slug}`} className="block w-full sm:w-40 md:w-44 lg:w-40 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
-                                                {project.poster?.sourceUrl
-                                                    ? <Image src={project.poster.sourceUrl} alt={project.poster.altText || project.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                                                    : <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm p-4 text-center">[No Poster]</div>
-                                                }
-                                            </Link>
-                                            <div className="flex-1 p-4 lg:p-5 flex flex-col">
-                                                <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
-                                                <p className="text-sm text-slate-500 mb-3">{formatType(project)}</p>
-                                                <div className="mb-4 max-h-[5.5rem] overflow-hidden flex-shrink-0">
-                                                    <p className="text-sm text-slate-700 leading-relaxed line-clamp-4">{project.logline || "Details coming soon."}</p>
-                                                </div>
-                                                <Link href={`/work/${project.slug}`} className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto">
-                                                    View Details
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex">
-                                        <div className="w-full sm:w-40 md:w-44 lg:w-40 flex-shrink-0">
-                                            <div className="bg-slate-600 text-white px-4 py-1 text-sm">{getStatusDisplay(project)}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        {isAll && inProgress.length > PREVIEW_COUNT && (
-                            <Link href="/work?section=in-progress" className="mt-8 flex items-center justify-center gap-2 w-full py-3 border border-slate-300 text-slate-600 text-sm hover:bg-white transition-colors">
-                                see all {inProgress.length} in progress <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        )}
-                    </div>
-                </section>
-            )}
+                            <h1 className="text-4xl lg:text-5xl font-light text-slate-900 mb-6">{film.title}</h1>
 
-            {/* ── Our Productions ─────────────────────────────────────────── */}
-            {displayProductions.length > 0 && (
-                <section id="our-productions" className="py-12 bg-white flex-shrink-0">
-                    <div className="container mx-auto px-6">
-                        <SectionHeader label="our productions" badgeBg="bg-slate-700" total={ourProductions.length} sectionKey="our-productions" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-5">
-                            {displayProductions.map((film) => (
-                                <div key={film.id} className="border border-slate-200 bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row h-full">
-                                    <PosterSlot href={`/work/${film.slug}`} sourceUrl={film.poster?.sourceUrl} altText={film.poster?.altText || film.title} />
-                                    <div className="p-4 lg:p-6 flex-1 flex flex-col">
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{film.title}</h3>
-                                        <p className="text-sm text-slate-500 mb-4">{formatType(film)}</p>
-                                        <p className="text-slate-600 mb-6 flex-1 line-clamp-3 text-sm lg:text-base leading-relaxed">
-                                            {film.logline || "No description available."}
-                                        </p>
-                                        <Link href={`/work/${film.slug}`} className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto">
-                                            View Details
-                                        </Link>
+                            <div className="flex flex-wrap gap-8 text-base text-slate-600 mb-8 font-medium">
+                                {film.releaseYear && (
+                                    <div className="flex items-center space-x-2.5">
+                                        <Calendar className="w-5 h-5 text-slate-500" />
+                                        <span>{film.releaseYear}</span>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                        {/* Full-width "See all" button in all mode */}
-                        {isAll && ourProductions.length > PREVIEW_COUNT && (
-                            <Link href="/work?section=our-productions" className="mt-8 flex items-center justify-center gap-2 w-full py-3 border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 hover:border-slate-400 transition-colors">
-                                see all {ourProductions.length} productions <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        )}
-                    </div>
-                </section>
-            )}
-
-            {/* ── Design Works — teaser card in "all" view, full gallery in section view ── */}
-            {isAll ? (
-                <section className="py-12 bg-slate-900 flex-shrink-0">
-                    <div className="container mx-auto px-6">
-                        <div className="flex items-end justify-between mb-6">
-                            <div className="inline-block bg-slate-700 text-white px-4 py-1 pt-3 text-sm right-top-br">design works</div>
-                        </div>
-                        <Link href="/work?section=design-works" className="group relative block overflow-hidden border border-slate-700 hover:border-slate-500 transition-colors">
-                            <div className="flex items-center justify-between p-8 md:p-12">
-                                <div>
-                                    <p className="text-white text-2xl md:text-3xl font-light mb-2">Poster Art · Flyers · Logos · Interactive</p>
-                                    <p className="text-slate-400 text-sm">View our full design portfolio</p>
-                                </div>
-                                <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-slate-600 transition-colors">
-                                    <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-0.5 transition-transform" />
+                                )}
+                                {film.durationMinutes && (
+                                    <div className="flex items-center space-x-2.5">
+                                        <Clock className="w-5 h-5 text-slate-500" />
+                                        <span>{formatDuration(film.durationMinutes)}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center space-x-2.5">
+                                    <Film className="w-5 h-5 text-slate-500" />
+                                    <span>{genresDisplay}</span>
                                 </div>
                             </div>
-                        </Link>
-                    </div>
-                </section>
-            ) : worksData && activeSection === "design-works" && (
-                <section id="design-works" className="py-16 bg-white flex-1 min-h-[50vh]">
-                    <div className="container mx-auto px-6">
-                        <div className="mb-6">
-                            <div className="inline-block bg-slate-700 text-white px-4 py-1 pt-3 text-sm right-top-br">design works</div>
-                        </div>
-                        <div className="space-y-16 mt-4">
-                            {worksData.posterArt.length > 0 && (
-                                <WorkGallerySection title="Poster Art" layoutType="poster" items={worksData.posterArt.map(img => ({ sourceUrl: img.sourceUrl, alt: "Poster Art" }))} />
-                            )}
-                            {worksData.flyersAds.length > 0 && (
-                                <WorkGallerySection title="Flyers & Ads" layoutType="flyer" items={worksData.flyersAds.map(img => ({ sourceUrl: img.sourceUrl, alt: "Flyer or Ad Design" }))} />
-                            )}
-                            {worksData.logoDesign.length > 0 && (
-                                <WorkGallerySection title="Logo Design" layoutType="logo" items={worksData.logoDesign.map(img => ({ sourceUrl: img.sourceUrl, alt: "Logo Design" }))} />
-                            )}
-                            {worksData.interactiveDesign.length > 0 && (
-                                <WorkGallerySection
-                                    title="Interactive Design"
-                                    layoutType="interactive"
-                                    items={worksData.interactiveDesign
-                                        .filter(item => item.image2?.node?.sourceUrl)
-                                        .map(item => ({ sourceUrl: item.image2!.node!.sourceUrl, link: item.link || null, alt: "Interactive Design Work" }))}
-                                />
-                            )}
-                        </div>
-                    </div>
-                </section>
-            )}
 
+                            {film.logline && (
+                                <div className="mb-6">
+                                    <h2 className="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3">Description</h2>
+                                    <p className="text-lg text-slate-700 leading-relaxed font-serif italic">
+                                        {film.logline}
+                                    </p>
+                                </div>
+                            )}
+
+
+                            <div className="flex flex-wrap gap-4 mb-8">
+                                {film.trailerUrl && (
+                                    <VideoModal
+                                        videoUrl={film.trailerUrl}
+                                        buttonText="Watch Trailer"
+                                        className="bg-slate-800 hover:bg-slate-700 text-white h-11 px-8 rounded-md"
+                                    />
+                                )}
+                                {film.imdbUrl && (
+                                    <Button asChild variant="outline" size="lg">
+                                        <Link href={film.imdbUrl} target="_blank" rel="noopener noreferrer">
+                                            <ExternalLink className="w-4 h-4 mr-2" />
+                                            View on IMDB
+                                        </Link>
+                                    </Button>
+                                )}
+                                {film.websiteUrl && (
+                                    <Button asChild variant="outline" size="lg">
+                                        <Link href={film.websiteUrl} target="_blank" rel="noopener noreferrer">
+                                            <ExternalLink className="w-4 h-4 mr-2" />
+                                            Official Website
+                                        </Link>
+                                    </Button>
+                                )}
+                            </div>
+
+                            {/* Coming Soon / Upcoming Events */}
+                            {upcomingEvents.length > 0 && (
+                                <div className="mb-8 p-6 bg-slate-900 rounded-lg text-white">
+                                    <h3 className="text-xl font-bold mb-4">Coming Soon</h3>
+                                    <div className="space-y-4">
+                                        {upcomingEvents.map((event, index) => {
+                                            const datetime = event.datetime ? new Date(event.datetime) : null
+                                            return (
+                                                <div key={index} className="flex flex-col sm:flex-row gap-2 sm:gap-6 pb-4 border-b border-white/10 last:border-0 last:pb-0">
+                                                    {datetime && (
+                                                        <div className="flex-shrink-0 sm:w-32 text-lg font-light text-slate-300">
+                                                            {datetime.toLocaleString("en-US", {
+                                                                month: "2-digit",
+                                                                day: "2-digit",
+                                                                year: "2-digit",
+                                                                timeZone: "UTC"
+                                                            }).split(',')[0]}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1">
+                                                        {event.title && (
+                                                            <div className="font-semibold text-white mb-1">
+                                                                {event.titleLink ? (
+                                                                    <Link href={event.titleLink} target="_blank" rel="noopener noreferrer" className="hover:underline transition-colors capitalize">
+                                                                        {event.title}
+                                                                    </Link>
+                                                                ) : (
+                                                                    <span className="capitalize">{event.title}</span>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {event.location && (
+                                                            <div className="text-sm text-slate-400">
+                                                                {event.location}
+                                                                {event.address && <span> • {event.address}</span>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Contributions (for collaborations/films with specific art roles) */}
+                            {film.collaboration && film.contributions && film.contributions.length > 0 && (
+                                <div id="contributions-section" className="mt-8 mb-8 p-6 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 scroll-mt-20">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <Link
+                                            href="#additional-info"
+                                            className="group flex-shrink-0 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+                                            title="Scroll to Details"
+                                        >
+                                            <div className="w-12 h-12 bg-[#0b101b] rounded-full flex items-center justify-center p-1 shadow-lg border border-slate-700/30 group-hover:border-slate-500 transition-colors overflow-hidden">
+                                                <Image
+                                                    src={settings?.siteLogo || "/KinsolFilms_Logo_FullColour_Light.png"}
+                                                    alt={settings?.siteTitle || "Kinsol Films"}
+                                                    width={48}
+                                                    height={48}
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            </div>
+                                        </Link>
+                                        <h3 className="text-xl font-bold">Our Contributions</h3>
+                                    </div>
+                                    <div className="grid sm:grid-cols-2 gap-y-4 gap-x-6 text-slate-800">
+                                        {film.contributions.map((contribution, index) => (
+                                            <div key={index} className="flex items-center space-x-3">
+                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full flex-shrink-0"></div>
+                                                <span className="font-medium text-base">{contribution}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Additional Details */}
+            <section id="additional-info" className="py-16 bg-slate-100">
+                <div className="container mx-auto px-6">
+                    <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        {/* Synopsis / About */}
+                        <div className="lg:col-span-2 space-y-6">
+                            {(film.synopsis || film.logline) && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h2 className="text-2xl font-bold mb-4">Synopsis</h2>
+                                        <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{film.synopsis || film.logline}</p>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Image Gallery */}
+                            {allImages.length > 1 && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h2 className="text-2xl font-bold mb-4">Gallery</h2>
+                                        <ImageGalleryModal images={allImages} title={film.title} gridStartIndex={film.poster ? 1 : 0} />
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
+
+                        {/* Cast & Crew / Watch & Engage */}
+                        <div className="space-y-6">
+                            {/* Watch & Engage */}
+                            {film.watchEngage && film.watchEngage.length > 0 && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h3 className="text-xl font-bold mb-4">Watch & Engage</h3>
+                                        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                                            {film.watchEngage.map((item, index) => (
+                                                <Link
+                                                    key={index}
+                                                    href={item.link || "#"}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex w-full h-12 relative hover:opacity-80 transition-opacity bg-white border border-slate-200 rounded-lg overflow-hidden items-center justify-center p-2"
+                                                >
+                                                    {item.watchImage?.sourceUrl ? (
+                                                        <Image
+                                                            src={item.watchImage.sourceUrl}
+                                                            alt={item.type || "Watch Provider"}
+                                                            fill
+                                                            className="object-contain p-1.5"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-[10px] font-semibold uppercase text-slate-700 tracking-wider">
+                                                            {item.type || "Watch Here"}
+                                                        </span>
+                                                    )}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {film.crew && film.crew.length > 0 && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h3 className="text-xl font-bold mb-4">Crew</h3>
+                                        <ExpandableList
+                                            title="Crew"
+                                            limit={4}
+                                            items={film.crew.map((member, index) => (
+                                                <div key={index}>
+                                                    <span className="text-slate-900">{displayCrewTitle(member)}:</span>{" "}
+                                                    {member.link ? (
+                                                        <Link href={member.link} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-slate-600">
+                                                            {member.name}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="font-bold">{member.name}</span>
+                                                    )}
+                                                    {member.featured && (
+                                                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 inline-block ml-1.5 -translate-y-0.5" aria-label="Featured Crew" />
+                                                    )}
+                                                </div>
+                                            ))}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {film.cast && film.cast.length > 0 && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h3 className="text-xl font-bold mb-4">Cast</h3>
+                                        <ExpandableList
+                                            title="Cast"
+                                            limit={4}
+                                            items={film.cast.map((member, index) => (
+                                                <div key={index}>
+                                                    {member.link ? (
+                                                        <Link href={member.link} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-slate-600">
+                                                            {member.castMember}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="font-bold">{member.castMember}</span>
+                                                    )}
+                                                    {member.featuredCast && (
+                                                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 inline-block ml-1.5 -translate-y-0.5" aria-label="Featured Cast" />
+                                                    )}
+                                                    {member.role && <span className="text-slate-500"> as {member.role}</span>}
+                                                </div>
+                                            ))}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {film.linksMedia && film.linksMedia.length > 0 && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h3 className="text-xl font-bold mb-4">Links & Media</h3>
+                                        <ExpandableList
+                                            title="Links & Media"
+                                            limit={4}
+                                            items={film.linksMedia.map((item, index) => (
+                                                <div key={index} className="space-y-1">
+                                                    {item.titleLink ? (
+                                                        <Link href={item.titleLink} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-slate-600 inline-flex items-center gap-1.5">
+                                                            <Globe className="w-3.5 h-3.5 text-slate-400" />
+                                                            {item.title}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="font-bold">{item.title}</span>
+                                                    )}
+                                                    {item.description && <p className="text-slate-600 text-sm leading-relaxed">{item.description}</p>}
+                                                </div>
+                                            ))}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {film.awards && film.awards.length > 0 && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <h3 className="text-xl font-bold mb-4">Awards</h3>
+                                        <div className="space-y-2 text-sm">
+                                            {film.awards.map((award, index) => (
+                                                <div key={index} className="flex items-start space-x-3">
+                                                    <Trophy className="w-4 h-4 text-amber-500 fill-amber-500/10 mt-0.5 flex-shrink-0" />
+                                                    <span className="text-slate-700">{award.award}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
             <Footer />
         </div>
     )
