@@ -128,6 +128,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 flex items-center">
             <div className="container mx-auto px-6">
               <div className="max-w-4xl">
+                <h1 className="text-7xl font-thin text-slate-400/90 mb-4 tracking-wide"></h1>
               </div>
             </div>
           </div>
