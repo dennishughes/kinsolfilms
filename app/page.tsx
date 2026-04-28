@@ -165,83 +165,83 @@ export default async function HomePage() {
 
       {/* Our Productions - three-column grid layout with right column */}
       {ourProductions.length > 0 && (
-        <section className="mb-12 bg-white pt-6">
-        <div className="container mx-auto px-6">
-          <div className="mb-6">
-            <div className="inline-block bg-slate-700 text-white px-4 py-1 pt-3 text-sm right-top-br">
-              our productions
-            </div>
-          </div>
-
-          <div className="flex gap-6 -mt-5">
-            {/* Main grid content */}
-            <div className="flex-1">
-              {/* Grid layout - 3 columns on desktop, 2 on tablet, 1 on mobile */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {ourProductions.slice(0, 3).map((film) => (
-                  <div
-                    key={film.id}
-                    className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300"
-                  >
-                    {/* Horizontal card layout */}
-                    <div className="flex flex-col sm:flex-row h-full">
-                      {/* Movie Poster */}
-                      <Link href={`/work/${film.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
-                        {film.poster?.sourceUrl ? (
-                          <Image
-                            src={film.poster.sourceUrl}
-                            alt={film.poster.altText || film.title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <span className="text-slate-500 text-xs">[Movie Poster]</span>
-                        )}
-                      </Link>
-
-                      {/* Content */}
-                      <div className="flex-1 p-3 lg:p-4 flex flex-col">
-                        <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{film.title}</h3>
-                        <p className="text-sm text-slate-600 mb-2">{formatType(film)}</p>
-                        <p className="text-xs lg:text-sm text-slate-700 mb-3 flex-1 line-clamp-3 leading-relaxed">
-                          {film.logline || "No description available."}
-                        </p>
-                        <Link
-                          href={`/work/${film.slug}`}
-                          className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start"
-                        >
-                          More
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+        <section className="mb-12 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="mb-6">
+              <div className="inline-block bg-slate-700 text-white px-4 py-1 pt-3 text-sm right-top-br">
+                our productions
               </div>
             </div>
 
-            {/* Right thin column */}
-            {ourProductions.length >= 3 && (
-              <Link href="/work?section=our-productions" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-700 transition-colors group cursor-pointer">
-              <div className="absolute top-6 left-0 w-full flex flex-col items-center">
-                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-10 -mt-2 group-hover:scale-110 transition-transform duration-300">
-                  <ArrowRight className="w-3 h-3 text-slate-800" />
+            <div className="flex gap-6 -mt-5">
+              {/* Main grid content */}
+              <div className="flex-1">
+                {/* Grid layout - 3 columns on desktop, 2 on tablet, 1 on mobile */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {ourProductions.slice(0, 3).map((film) => (
+                    <div
+                      key={film.id}
+                      className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300"
+                    >
+                      {/* Horizontal card layout */}
+                      <div className="flex flex-col sm:flex-row h-full">
+                        {/* Movie Poster */}
+                        <Link href={`/work/${film.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
+                          {film.poster?.sourceUrl ? (
+                            <Image
+                              src={film.poster.sourceUrl}
+                              alt={film.poster.altText || film.title}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <span className="text-slate-500 text-xs">[Movie Poster]</span>
+                          )}
+                        </Link>
+
+                        {/* Content */}
+                        <div className="flex-1 p-3 lg:p-4 flex flex-col">
+                          <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{film.title}</h3>
+                          <p className="text-sm text-slate-600 mb-2">{formatType(film)}</p>
+                          <p className="text-xs lg:text-sm text-slate-700 mb-3 flex-1 line-clamp-3 leading-relaxed">
+                            {film.logline || "No description available."}
+                          </p>
+                          <Link
+                            href={`/work/${film.slug}`}
+                            className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start"
+                          >
+                            More
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
-                  see all films
-                </div>
-                </div>
-              </Link>
-            )}
+              </div>
+
+              {/* Right thin column */}
+              {ourProductions.length >= 3 && (
+                <Link href="/work?section=our-productions" className="w-8 bg-slate-600 flex-shrink-0 relative block self-stretch hover:bg-slate-700 transition-colors group cursor-pointer right-top-br">
+                  <div className="absolute top-6 left-0 w-full flex flex-col items-center">
+                    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-10 -mt-2 group-hover:scale-110 transition-transform duration-300">
+                      <ArrowRight className="w-3 h-3 text-slate-800" />
+                    </div>
+                    <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
+                      see all films
+                    </div>
+                  </div>
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* Coming Soon - poster + embedded trailer + text layout */}
       {featuredProduction && (
         <section className="py-12 bg-slate-800">
           <div className="container mx-auto px-6">
-            <div className="mb-1">
+            <div className="mb-4">
               <div className="inline-block bg-slate-600 text-white px-4 py-1 text-sm right-top-br">latest work</div>
             </div>
 
@@ -463,7 +463,7 @@ export default async function HomePage() {
 
                 {/* Sidebar bar — only when 3 cards shown */}
                 {upcomingCards.length >= 3 && (
-                  <Link href="/work?section=coming-soon" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-500 transition-colors group cursor-pointer">
+                  <Link href="/work?section=coming-soon" className="w-8 bg-slate-600 flex-shrink-0 relative block self-stretch hover:bg-slate-500 transition-colors group cursor-pointer right-top-br">
                     <div className="absolute top-6 left-0 w-full flex flex-col items-center">
                       <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
                         <ArrowRight className="w-3 h-3 text-slate-800" />
@@ -483,107 +483,24 @@ export default async function HomePage() {
       {/* Collaborations - three-column horizontal layout, one row */}
       {collaborations.length > 0 && (
         <section className="py-12 bg-white pt-12">
-        <div className="container mx-auto px-6">
-          <div className="mb-6">
-            <div className="inline-block bg-slate-700 text-white px-4 py-1 text-sm right-top-br">purely post</div>
-          </div>
-
-          <div className="flex gap-6 -mt-5">
-            {/* Grid */}
-            <div className="flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {collaborations.slice(0, 3).map((project) => (
-                  <div
-                    key={project.id}
-                    className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300"
-                  >
-                    {/* Horizontal card layout */}
-                    <div className="flex flex-col sm:flex-row h-full">
-                      {/* Movie Poster */}
-                      <Link href={`/work/${project.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
-                        {project.poster?.sourceUrl ? (
-                          <Image
-                            src={project.poster.sourceUrl}
-                            alt={project.poster.altText || project.title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <span className="text-slate-500 text-xs">[Movie Poster]</span>
-                        )}
-                      </Link>
-
-                      {/* Content */}
-                      <div className="flex-1 p-3 lg:p-4 flex flex-col">
-                        <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
-                        <p className="text-sm text-slate-600 mb-3">{formatType(project)}</p>
-
-                        {project.contributions && project.contributions.length > 0 && (
-                          <div className="mb-4 flex-1">
-                            <p className="text-xs font-medium mb-2">Our Contributions</p>
-                            <div className="grid grid-cols-2 gap-1 text-xs">
-                              {project.contributions.slice(0, 8).map((item, idx) => (
-                                <div key={idx} className="flex items-center space-x-2">
-                                  <div className="w-2 h-2 border border-slate-400 rounded-sm flex items-center justify-center flex-shrink-0">
-                                    <div className="w-1 h-1 bg-slate-400 rounded-sm"></div>
-                                  </div>
-                                  <span className="truncate">{item}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <Link
-                          href={`/work/${project.slug}`}
-                          className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto"
-                        >
-                          More
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className="container mx-auto px-6">
+            <div className="mb-6">
+              <div className="inline-block bg-slate-700 text-white px-4 py-1 text-sm right-top-br">purely post</div>
             </div>
 
-            {/* Sidebar bar — only when 3+ collaborations */}
-            {collaborations.length >= 3 && (
-              <Link href="/work?section=collaborations" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-700 transition-colors group cursor-pointer">
-                <div className="absolute top-6 left-0 w-full flex flex-col items-center">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-3 h-3 text-slate-800" />
-                  </div>
-                  <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
-                    see all collaborations
-                  </div>
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
-      )}
-
-      {/* In Progress - horizontal layout like productions */}
-      {inProgress.length > 0 && (
-        <section className="py-12 bg-slate-100">
-        <div className="container mx-auto px-6">
-          <div className="mb-6">
-            <div className="inline-block bg-amber-600 text-white px-4 py-1 text-sm right-top-br">in progress</div>
-          </div>
-
-          <div className="flex gap-6 -mt-5">
-            {/* Grid */}
-            <div className="flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {inProgress.slice(0, 3).map((project) => (
-                  <div key={project.id}>
-                    {/* Main card with horizontal layout */}
-                    <div className="border border-slate-300 hover:shadow-lg transition-shadow duration-300 mb-2">
+            <div className="flex gap-6 -mt-5">
+              {/* Grid */}
+              <div className="flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {collaborations.slice(0, 3).map((project) => (
+                    <div
+                      key={project.id}
+                      className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300"
+                    >
+                      {/* Horizontal card layout */}
                       <div className="flex flex-col sm:flex-row h-full">
                         {/* Movie Poster */}
-                        <Link href={`/work/${project.slug}`} className="block w-full sm:w-40 md:w-44 lg:w-40 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
+                        <Link href={`/work/${project.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
                           {project.poster?.sourceUrl ? (
                             <Image
                               src={project.poster.sourceUrl}
@@ -592,19 +509,31 @@ export default async function HomePage() {
                               className="object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
-                            <span className="text-slate-500 text-sm">[Movie Poster]</span>
+                            <span className="text-slate-500 text-xs">[Movie Poster]</span>
                           )}
                         </Link>
 
                         {/* Content */}
-                        <div className="flex-1 p-4 lg:p-5 flex flex-col">
-                          <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
-                          <p className="text-sm text-slate-500 mb-3">{formatType(project)}</p>
-                          <div className="mb-4 max-h-[5.5rem] overflow-hidden flex-shrink-0">
-                            <p className="text-sm text-slate-700 leading-relaxed line-clamp-4">
-                              {project.logline || "Details coming soon."}
-                            </p>
-                          </div>
+                        <div className="flex-1 p-3 lg:p-4 flex flex-col">
+                          <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
+                          <p className="text-sm text-slate-600 mb-3">{formatType(project)}</p>
+
+                          {project.contributions && project.contributions.length > 0 && (
+                            <div className="mb-4 flex-1">
+                              <p className="text-xs font-medium mb-2">Our Contributions</p>
+                              <div className="grid grid-cols-2 gap-1 text-xs">
+                                {project.contributions.slice(0, 8).map((item, idx) => (
+                                  <div key={idx} className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 border border-slate-400 rounded-sm flex items-center justify-center flex-shrink-0">
+                                      <div className="w-1 h-1 bg-slate-400 rounded-sm"></div>
+                                    </div>
+                                    <span className="truncate">{item}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           <Link
                             href={`/work/${project.slug}`}
                             className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto"
@@ -614,34 +543,109 @@ export default async function HomePage() {
                         </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
 
-                    {/* Status indicator below the card - matches poster width */}
-                    <div className="flex">
-                      <div className="w-full sm:w-40 md:w-44 lg:w-40 flex-shrink-0">
-                        <div className="bg-slate-600 text-white px-4 py-1 text-sm">{getStatusDisplay(project)}</div>
-                      </div>
+              {/* Sidebar bar — only when 3+ collaborations */}
+              {collaborations.length >= 3 && (
+                <Link href="/work?section=collaborations" className="w-8 bg-slate-600 flex-shrink-0 relative block self-stretch hover:bg-slate-700 transition-colors group cursor-pointer right-top-br">
+                  <div className="absolute top-6 left-0 w-full flex flex-col items-center">
+                    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
+                      <ArrowRight className="w-3 h-3 text-slate-800" />
+                    </div>
+                    <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
+                      see all collaborations
                     </div>
                   </div>
-                ))}
-              </div>
+                </Link>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* In Progress - horizontal layout like productions */}
+      {inProgress.length > 0 && (
+        <section className="py-12 bg-slate-100">
+          <div className="container mx-auto px-6">
+            <div className="mb-6">
+              <div className="inline-block bg-amber-600 text-white px-4 py-1 text-sm right-top-br">in progress</div>
             </div>
 
-            {/* Sidebar bar — only when 3+ in-progress */}
-            {inProgress.length >= 3 && (
-              <Link href="/work?section=in-progress" className="w-8 bg-amber-600 flex-shrink-0 relative block hover:bg-amber-700 transition-colors group cursor-pointer">
-                <div className="absolute top-6 left-0 w-full flex flex-col items-center">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-3 h-3 text-amber-700" />
-                  </div>
-                  <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
-                    see all in progress
-                  </div>
+            <div className="flex gap-6 -mt-5">
+              {/* Grid */}
+              <div className="flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {inProgress.slice(0, 3).map((project) => (
+                    <div key={project.id}>
+                      {/* Main card with horizontal layout */}
+                      <div className="border border-slate-300 hover:shadow-lg transition-shadow duration-300 mb-2">
+                        <div className="flex flex-col sm:flex-row h-full">
+                          {/* Movie Poster */}
+                          <Link href={`/work/${project.slug}`} className="block w-full sm:w-40 md:w-44 lg:w-40 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
+                            {project.poster?.sourceUrl ? (
+                              <Image
+                                src={project.poster.sourceUrl}
+                                alt={project.poster.altText || project.title}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            ) : (
+                              <span className="text-slate-500 text-sm">[Movie Poster]</span>
+                            )}
+                          </Link>
+
+                          {/* Content */}
+                          <div className="flex-1 p-4 lg:p-5 flex flex-col">
+                            <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
+                            <p className="text-sm text-slate-500 mb-3">{formatType(project)}</p>
+                            <div className="mb-4 max-h-[5.5rem] overflow-hidden flex-shrink-0">
+                              <p className="text-sm text-slate-700 leading-relaxed line-clamp-4">
+                                {project.logline || "Details coming soon."}
+                              </p>
+                            </div>
+                            <Link
+                              href={`/work/${project.slug}`}
+                              className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto"
+                            >
+                              More
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Status indicator below the card - matches poster width */}
+                      <div className="flex">
+                        <div className="w-full sm:w-40 md:w-44 lg:w-40 flex-shrink-0">
+                          <div className="bg-slate-600 text-white px-4 py-1 text-sm right-bottom-br">{getStatusDisplay(project)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </Link>
-            )}
+              </div>
+
+              {/* Sidebar bar — only when 3+ in-progress */}
+              {inProgress.length >= 3 && (
+                <div className="flex flex-col self-stretch">
+                  <Link href="/work?section=in-progress" className="w-8 bg-amber-600 flex-1 relative block hover:bg-amber-700 transition-colors group cursor-pointer right-top-br">
+                    <div className="absolute top-6 left-0 w-full flex flex-col items-center">
+                      <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
+                        <ArrowRight className="w-3 h-3 text-amber-700" />
+                      </div>
+                      <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
+                        see all in progress
+                      </div>
+                    </div>
+                  </Link>
+                  {/* Spacer to align sidebar with card box, excluding status labels */}
+                  <div className="h-10" />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* Footer - from generalized component */}

@@ -538,7 +538,10 @@ html {
 
 .right-top-br {
   border-radius: 0 10px 0 0;
-  margin-bottom: 10px;
+}
+
+.right-bottom-br {
+  border-radius: 0 0 10px 0;
 }
 
 body {
