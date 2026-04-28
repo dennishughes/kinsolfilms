@@ -35,7 +35,7 @@ export default async function ServicesPage() {
 
                 <div className="container relative mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-5xl md:text-7xl font-light mb-8 text-transform: lowercase">
+                        <h1 className="text-5xl md:text-7xl font-light mb-8">
                             {servicesSettings?.heroTitle || "Our Services"}
                         </h1>
                         <p className="text-xl text-slate-200 leading-relaxed font-light">

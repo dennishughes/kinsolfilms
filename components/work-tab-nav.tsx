@@ -49,14 +49,19 @@ const TABS: { id: WorkSection; label: string; activeBg: string; activeBorder: st
 
 interface WorkTabNavProps {
     activeSection: WorkSection
+    visibleSections?: WorkSection[]
 }
 
-export function WorkTabNav({ activeSection }: WorkTabNavProps) {
+export function WorkTabNav({ activeSection, visibleSections }: WorkTabNavProps) {
+    const tabsToRender = visibleSections 
+        ? TABS.filter(tab => visibleSections.includes(tab.id))
+        : TABS
+
     return (
         <div className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
             <div className="container mx-auto px-6">
                 <nav className="flex overflow-x-auto no-scrollbar gap-1 py-0 justify-center" aria-label="Work sections">
-                    {TABS.map((tab) => {
+                    {tabsToRender.map((tab) => {
                         const isActive = tab.id === activeSection
                         return (
                             <Link

@@ -92,7 +92,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Team */}
-      {teamMembers && teamMembers.length > 0 && (
+      {/* {teamMembers && teamMembers.length > 0 && (
         <section className="py-16 bg-slate-100">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -110,7 +110,7 @@ export default async function AboutPage() {
             </div>
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Awards & Recognition */}
       {aboutSettings?.awardsRecognition && aboutSettings.awardsRecognition.length > 0 && (

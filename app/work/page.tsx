@@ -30,23 +30,41 @@ export default async function WorkPage({ searchParams }: WorkPageProps) {
     const activeSection = (section || "all") as WorkSection
     const isAll = activeSection === "all"
 
-    const needsDesign = activeSection === "design-works" // "all" skips design fetch
-    const needsProductions = activeSection !== "design-works"
-
     const [allProductions, worksData, settings] = await Promise.all([
-        needsProductions ? fetchProductions() : Promise.resolve([]),
-        needsDesign ? fetchWorks() : Promise.resolve(null),
+        fetchProductions(),
+        fetchWorks(),
         fetchEAMSettings(),
     ])
 
     const workSettings = settings?.work
 
-    // Derived lists
-    const ourProductions = (isAll || activeSection === "our-productions") ? getOurProductions(allProductions) : []
-    const comingSoon = (isAll || activeSection === "coming-soon") ? getComingSoonProductions(allProductions) : []
+    // Compute full lists for tab visibility
+    const allOurProductions = getOurProductions(allProductions)
+    const allComingSoon = getComingSoonProductions(allProductions)
+    const allInProgress = getInProgressProductions(allProductions)
+    const allCollaborations = getCollaborations(allProductions)
+
+    // Check if there are any design works
+    const hasDesignWorks = worksData && (
+        worksData.posterArt.length > 0 ||
+        worksData.flyersAds.length > 0 ||
+        worksData.logoDesign.length > 0 ||
+        worksData.interactiveDesign.length > 0
+    )
+
+    const visibleSections: WorkSection[] = ["all"]
+    if (allOurProductions.length > 0) visibleSections.push("our-productions")
+    if (allComingSoon.length > 0) visibleSections.push("coming-soon")
+    if (allInProgress.length > 0) visibleSections.push("in-progress")
+    if (allCollaborations.length > 0) visibleSections.push("collaborations")
+    if (hasDesignWorks) visibleSections.push("design-works")
+
+    // Derived lists for rendering
+    const ourProductions = (isAll || activeSection === "our-productions") ? allOurProductions : []
+    const comingSoon = (isAll || activeSection === "coming-soon") ? allComingSoon : []
     const upcomingEvents = (isAll || activeSection === "coming-soon") ? getUpcomingEvents(allProductions) : []
-    const inProgress = (isAll || activeSection === "in-progress") ? getInProgressProductions(allProductions) : []
-    const collaborations = (isAll || activeSection === "collaborations") ? getCollaborations(allProductions) : []
+    const inProgress = (isAll || activeSection === "in-progress") ? allInProgress : []
+    const collaborations = (isAll || activeSection === "collaborations") ? allCollaborations : []
 
     // In "all" mode each section is capped to PREVIEW_COUNT; in section mode show all
     const displayProductions = isAll ? ourProductions.slice(0, PREVIEW_COUNT) : ourProductions
@@ -131,7 +149,7 @@ export default async function WorkPage({ searchParams }: WorkPageProps) {
                 </div>
                 <div className="container relative mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-5xl md:text-7xl font-light mb-8 text-transform: lowercase">
+                        <h1 className="text-5xl md:text-7xl font-light mb-8">
                             {workSettings?.heroTitle || "Our Work"}
                         </h1>
                         <p className="text-xl text-slate-200 leading-relaxed font-light">
@@ -142,7 +160,7 @@ export default async function WorkPage({ searchParams }: WorkPageProps) {
             </section>
 
             {/* Sticky tab nav */}
-            <WorkTabNav activeSection={activeSection} />
+            <WorkTabNav activeSection={activeSection} visibleSections={visibleSections} />
 
             {/* ── Collaborations ──────────────────────────────────────────── */}
             {displayCollabs.length > 0 && (
@@ -228,6 +246,38 @@ export default async function WorkPage({ searchParams }: WorkPageProps) {
                 </section>
             )}
 
+            {/* ── Our Productions ─────────────────────────────────────────── */}
+            {displayProductions.length > 0 && (
+                <section id="our-productions" className="py-12 bg-white flex-shrink-0">
+                    <div className="container mx-auto px-6">
+                        <SectionHeader label="our productions" badgeBg="bg-slate-700" total={ourProductions.length} sectionKey="our-productions" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-5">
+                            {displayProductions.map((film) => (
+                                <div key={film.id} className="border border-slate-200 bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row h-full">
+                                    <PosterSlot href={`/work/${film.slug}`} sourceUrl={film.poster?.sourceUrl} altText={film.poster?.altText || film.title} />
+                                    <div className="p-4 lg:p-6 flex-1 flex flex-col">
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{film.title}</h3>
+                                        <p className="text-sm text-slate-500 mb-4">{formatType(film)}</p>
+                                        <p className="text-slate-600 mb-6 flex-1 line-clamp-3 text-sm lg:text-base leading-relaxed">
+                                            {film.logline || "No description available."}
+                                        </p>
+                                        <Link href={`/work/${film.slug}`} className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto">
+                                            View Details
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {/* Full-width "See all" button in all mode */}
+                        {isAll && ourProductions.length > PREVIEW_COUNT && (
+                            <Link href="/work?section=our-productions" className="mt-8 flex items-center justify-center gap-2 w-full py-3 border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 hover:border-slate-400 transition-colors">
+                                see all {ourProductions.length} productions <ArrowRight className="w-4 h-4" />
+                            </Link>
+                        )}
+                    </div>
+                </section>
+            )}
+
             {/* ── In Progress ─────────────────────────────────────────────── */}
             {displayInProgress.length > 0 && (
                 <section id="in-progress" className="py-12 bg-slate-100 flex-shrink-0">
@@ -273,40 +323,8 @@ export default async function WorkPage({ searchParams }: WorkPageProps) {
                 </section>
             )}
 
-            {/* ── Our Productions ─────────────────────────────────────────── */}
-            {displayProductions.length > 0 && (
-                <section id="our-productions" className="py-12 bg-white flex-shrink-0">
-                    <div className="container mx-auto px-6">
-                        <SectionHeader label="our productions" badgeBg="bg-slate-700" total={ourProductions.length} sectionKey="our-productions" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-5">
-                            {displayProductions.map((film) => (
-                                <div key={film.id} className="border border-slate-200 bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row h-full">
-                                    <PosterSlot href={`/work/${film.slug}`} sourceUrl={film.poster?.sourceUrl} altText={film.poster?.altText || film.title} />
-                                    <div className="p-4 lg:p-6 flex-1 flex flex-col">
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{film.title}</h3>
-                                        <p className="text-sm text-slate-500 mb-4">{formatType(film)}</p>
-                                        <p className="text-slate-600 mb-6 flex-1 line-clamp-3 text-sm lg:text-base leading-relaxed">
-                                            {film.logline || "No description available."}
-                                        </p>
-                                        <Link href={`/work/${film.slug}`} className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto">
-                                            View Details
-                                        </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        {/* Full-width "See all" button in all mode */}
-                        {isAll && ourProductions.length > PREVIEW_COUNT && (
-                            <Link href="/work?section=our-productions" className="mt-8 flex items-center justify-center gap-2 w-full py-3 border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 hover:border-slate-400 transition-colors">
-                                see all {ourProductions.length} productions <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        )}
-                    </div>
-                </section>
-            )}
-
             {/* ── Design Works — teaser card in "all" view, full gallery in section view ── */}
-            {isAll ? (
+            {hasDesignWorks && isAll ? (
                 <section className="py-12 bg-slate-900 flex-shrink-0">
                     <div className="container mx-auto px-6">
                         <div className="flex items-end justify-between mb-6">

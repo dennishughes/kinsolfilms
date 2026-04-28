@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Clock, Film, ExternalLink, Calendar, Play } from "lucide-react"
+import { ArrowLeft, Clock, Film, ExternalLink, Calendar, Play, Globe } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Header } from "@/components/header"
@@ -426,6 +426,31 @@ export default async function FilmDetailPage({ params }: { params: { slug: strin
                             <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 inline-block ml-1.5 -translate-y-0.5" aria-label="Featured Cast" />
                           )}
                           {member.role && <span className="text-slate-500"> as {member.role}</span>}
+                        </div>
+                      ))}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {film.linksMedia && film.linksMedia.length > 0 && (
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold mb-4">Links & Media</h3>
+                    <ExpandableList
+                      title="Links & Media"
+                      limit={4}
+                      items={film.linksMedia.map((item, index) => (
+                        <div key={index} className="space-y-1">
+                          {item.titleLink ? (
+                            <Link href={item.titleLink} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-slate-600 inline-flex items-center gap-1.5">
+                              <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span className="break-words">{item.title}</span>
+                            </Link>
+                          ) : (
+                            <span className="font-bold break-words">{item.title}</span>
+                          )}
+                          {item.description && <p className="text-slate-600 text-sm leading-relaxed mt-1">{item.description}</p>}
                         </div>
                       ))}
                     />

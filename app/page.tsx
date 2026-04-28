@@ -89,11 +89,13 @@ export default async function HomePage() {
             <p className="text-xl md:text-2xl text-slate-200 leading-relaxed font-light mb-8">
               {homepageSettings?.heroText || "Making meaningful media that explores critical social issues and tells compelling human stories."}
             </p>
-            <VideoModal
-              videoUrl={homepageSettings?.heroButtonUrl || "https://vimeo.com/365363979"}
-              buttonText={homepageSettings?.heroButtonTitle || "watch our sizzle"}
-              className="bg-transparent border-white/30 text-white hover:bg-white hover:text-slate-900 px-8 py-6 text-lg tracking-wide rounded-full transition-all duration-300"
-            />
+            {(homepageSettings?.heroButtonUrl || homepageSettings?.heroButtonTitle || !homepageSettings) && (
+              <VideoModal
+                videoUrl={homepageSettings?.heroButtonUrl || "https://vimeo.com/365363979"}
+                buttonText={homepageSettings?.heroButtonTitle || "watch our sizzle"}
+                className="bg-transparent border-white/30 text-white hover:bg-white hover:text-slate-900 px-8 py-6 text-lg tracking-wide rounded-full transition-all duration-300"
+              />
+            )}
           </div>
         </div>
       </section>
@@ -161,30 +163,34 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Collaborations - three-column horizontal layout, one row */}
-      <section className="mb-12 bg-white">
+      {/* Our Productions - three-column grid layout with right column */}
+      {ourProductions.length > 0 && (
+        <section className="mb-12 bg-white pt-6">
         <div className="container mx-auto px-6">
           <div className="mb-6">
-            <div className="inline-block bg-slate-700 text-white px-4 py-1 text-sm right-top-br">purely post</div>
+            <div className="inline-block bg-slate-700 text-white px-4 py-1 pt-3 text-sm right-top-br">
+              our productions
+            </div>
           </div>
 
           <div className="flex gap-6 -mt-5">
-            {/* Grid */}
+            {/* Main grid content */}
             <div className="flex-1">
+              {/* Grid layout - 3 columns on desktop, 2 on tablet, 1 on mobile */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {collaborations.slice(0, 3).map((project) => (
+                {ourProductions.slice(0, 3).map((film) => (
                   <div
-                    key={project.id}
+                    key={film.id}
                     className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300"
                   >
                     {/* Horizontal card layout */}
                     <div className="flex flex-col sm:flex-row h-full">
                       {/* Movie Poster */}
-                      <Link href={`/work/${project.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
-                        {project.poster?.sourceUrl ? (
+                      <Link href={`/work/${film.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
+                        {film.poster?.sourceUrl ? (
                           <Image
-                            src={project.poster.sourceUrl}
-                            alt={project.poster.altText || project.title}
+                            src={film.poster.sourceUrl}
+                            alt={film.poster.altText || film.title}
                             fill
                             className="object-cover transition-transform duration-500 group-hover:scale-105"
                           />
@@ -195,28 +201,14 @@ export default async function HomePage() {
 
                       {/* Content */}
                       <div className="flex-1 p-3 lg:p-4 flex flex-col">
-                        <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
-                        <p className="text-sm text-slate-600 mb-3">{formatType(project)}</p>
-
-                        {project.contributions && project.contributions.length > 0 && (
-                          <div className="mb-4 flex-1">
-                            <p className="text-xs font-medium mb-2">Our Contributions</p>
-                            <div className="grid grid-cols-2 gap-1 text-xs">
-                              {project.contributions.slice(0, 8).map((item, idx) => (
-                                <div key={idx} className="flex items-center space-x-2">
-                                  <div className="w-2 h-2 border border-slate-400 rounded-sm flex items-center justify-center flex-shrink-0">
-                                    <div className="w-1 h-1 bg-slate-400 rounded-sm"></div>
-                                  </div>
-                                  <span className="truncate">{item}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
+                        <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{film.title}</h3>
+                        <p className="text-sm text-slate-600 mb-2">{formatType(film)}</p>
+                        <p className="text-xs lg:text-sm text-slate-700 mb-3 flex-1 line-clamp-3 leading-relaxed">
+                          {film.logline || "No description available."}
+                        </p>
                         <Link
-                          href={`/work/${project.slug}`}
-                          className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto"
+                          href={`/work/${film.slug}`}
+                          className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start"
                         >
                           More
                         </Link>
@@ -227,22 +219,23 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Sidebar bar — only when 3+ collaborations */}
-            {collaborations.length >= 3 && (
-              <Link href="/work?section=collaborations" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-700 transition-colors group cursor-pointer">
-                <div className="absolute top-6 left-0 w-full flex flex-col items-center">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-3 h-3 text-slate-800" />
-                  </div>
-                  <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
-                    see all collaborations
-                  </div>
+            {/* Right thin column */}
+            {ourProductions.length >= 3 && (
+              <Link href="/work?section=our-productions" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-700 transition-colors group cursor-pointer">
+              <div className="absolute top-6 left-0 w-full flex flex-col items-center">
+                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-10 -mt-2 group-hover:scale-110 transition-transform duration-300">
+                  <ArrowRight className="w-3 h-3 text-slate-800" />
+                </div>
+                <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
+                  see all films
+                </div>
                 </div>
               </Link>
             )}
           </div>
         </div>
       </section>
+      )}
 
       {/* Coming Soon - poster + embedded trailer + text layout */}
       {featuredProduction && (
@@ -487,33 +480,31 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Our Productions - three-column grid layout with right column */}
-      <section className="py-12 bg-white pt-12">
+      {/* Collaborations - three-column horizontal layout, one row */}
+      {collaborations.length > 0 && (
+        <section className="py-12 bg-white pt-12">
         <div className="container mx-auto px-6">
           <div className="mb-6">
-            <div className="inline-block bg-slate-700 text-white px-4 py-1 pt-3 text-sm right-top-br">
-              our productions
-            </div>
+            <div className="inline-block bg-slate-700 text-white px-4 py-1 text-sm right-top-br">purely post</div>
           </div>
 
           <div className="flex gap-6 -mt-5">
-            {/* Main grid content */}
+            {/* Grid */}
             <div className="flex-1">
-              {/* Grid layout - 3 columns on desktop, 2 on tablet, 1 on mobile */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {ourProductions.slice(0, 3).map((film) => (
+                {collaborations.slice(0, 3).map((project) => (
                   <div
-                    key={film.id}
+                    key={project.id}
                     className="border border-slate-300 bg-white hover:shadow-lg transition-shadow duration-300"
                   >
                     {/* Horizontal card layout */}
                     <div className="flex flex-col sm:flex-row h-full">
                       {/* Movie Poster */}
-                      <Link href={`/work/${film.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
-                        {film.poster?.sourceUrl ? (
+                      <Link href={`/work/${project.slug}`} className="block w-full sm:w-32 md:w-28 lg:w-32 aspect-[3/4] sm:aspect-[2/3] bg-slate-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-slate-300 flex-shrink-0 relative overflow-hidden group">
+                        {project.poster?.sourceUrl ? (
                           <Image
-                            src={film.poster.sourceUrl}
-                            alt={film.poster.altText || film.title}
+                            src={project.poster.sourceUrl}
+                            alt={project.poster.altText || project.title}
                             fill
                             className="object-cover transition-transform duration-500 group-hover:scale-105"
                           />
@@ -524,14 +515,28 @@ export default async function HomePage() {
 
                       {/* Content */}
                       <div className="flex-1 p-3 lg:p-4 flex flex-col">
-                        <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{film.title}</h3>
-                        <p className="text-sm text-slate-600 mb-2">{formatType(film)}</p>
-                        <p className="text-xs lg:text-sm text-slate-700 mb-3 flex-1 line-clamp-3 leading-relaxed">
-                          {film.logline || "No description available."}
-                        </p>
+                        <h3 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 line-clamp-2">{project.title}</h3>
+                        <p className="text-sm text-slate-600 mb-3">{formatType(project)}</p>
+
+                        {project.contributions && project.contributions.length > 0 && (
+                          <div className="mb-4 flex-1">
+                            <p className="text-xs font-medium mb-2">Our Contributions</p>
+                            <div className="grid grid-cols-2 gap-1 text-xs">
+                              {project.contributions.slice(0, 8).map((item, idx) => (
+                                <div key={idx} className="flex items-center space-x-2">
+                                  <div className="w-2 h-2 border border-slate-400 rounded-sm flex items-center justify-center flex-shrink-0">
+                                    <div className="w-1 h-1 bg-slate-400 rounded-sm"></div>
+                                  </div>
+                                  <span className="truncate">{item}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         <Link
-                          href={`/work/${film.slug}`}
-                          className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start"
+                          href={`/work/${project.slug}`}
+                          className="text-sm text-slate-800 underline font-medium hover:text-slate-600 transition-colors self-start mt-auto"
                         >
                           More
                         </Link>
@@ -542,23 +547,27 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right thin column */}
-            <Link href="/work?section=our-productions" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-700 transition-colors group cursor-pointer">
-              <div className="absolute top-6 left-0 w-full flex flex-col items-center">
-                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-10 -mt-2 group-hover:scale-110 transition-transform duration-300">
-                  <ArrowRight className="w-3 h-3 text-slate-800" />
+            {/* Sidebar bar — only when 3+ collaborations */}
+            {collaborations.length >= 3 && (
+              <Link href="/work?section=collaborations" className="w-8 bg-slate-600 flex-shrink-0 relative block hover:bg-slate-700 transition-colors group cursor-pointer">
+                <div className="absolute top-6 left-0 w-full flex flex-col items-center">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mb-16 -mt-2 group-hover:scale-110 transition-transform duration-300">
+                    <ArrowRight className="w-3 h-3 text-slate-800" />
+                  </div>
+                  <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
+                    see all collaborations
+                  </div>
                 </div>
-                <div className="text-white text-xs transform rotate-90 origin-center whitespace-nowrap">
-                  see all films
-                </div>
-              </div>
-            </Link>
+              </Link>
+            )}
           </div>
         </div>
       </section>
+      )}
 
       {/* In Progress - horizontal layout like productions */}
-      <section className="py-12 bg-slate-100">
+      {inProgress.length > 0 && (
+        <section className="py-12 bg-slate-100">
         <div className="container mx-auto px-6">
           <div className="mb-6">
             <div className="inline-block bg-amber-600 text-white px-4 py-1 text-sm right-top-br">in progress</div>
@@ -633,6 +642,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Footer - from generalized component */}
       <Footer />
