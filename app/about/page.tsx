@@ -153,9 +153,9 @@ export default async function AboutPage() {
       )}
 
       {/* Get in Touch */}
-      <section className="py-16 bg-slate-800 text-white text-center">
+      <section className="py-16 bg-slate-700 text-white text-center">
         <div className="container mx-auto px-4">
-          <Badge variant="secondary" className="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 mb-6 border-none">
+          <Badge variant="secondary" className="bg-slate-600 hover:bg-slate-500 text-slate-200 px-4 py-2 mb-6 border-none">
             get in touch
           </Badge>
           {aboutSettings?.getInTouchContent ? (
