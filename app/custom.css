@@ -555,30 +555,89 @@ body {
 }
 
 /* Tailwind Slate Class Overrides to Green Theme */
-.bg-slate-900 { background-color: var(--kinsol-green-900) !important; }
-.bg-slate-800 { background-color: var(--kinsol-green-800) !important; }
-.bg-slate-700 { background-color: var(--kinsol-green-700) !important; }
-.bg-slate-600 { background-color: var(--kinsol-green-600) !important; }
-.bg-slate-500 { background-color: var(--kinsol-green-500) !important; }
-.bg-slate-100 { background-color: #f0fdfa !important; }
-.bg-slate-50 { background-color: #f9fefc !important; }
+.bg-slate-900 {
+  background-color: var(--kinsol-green-900) !important;
+}
 
-.text-slate-900 { color: var(--kinsol-green-900) !important; }
-.text-slate-800 { color: var(--kinsol-green-800) !important; }
-.text-slate-700 { color: var(--kinsol-green-700) !important; }
-.text-slate-600 { color: var(--kinsol-green-600) !important; }
-.text-slate-500 { color: var(--kinsol-green-700) !important; }
-.text-slate-400 { color: var(--kinsol-green-400) !important; }
-.text-slate-300 { color: var(--kinsol-green-300) !important; }
-.text-slate-200 { color: var(--kinsol-green-200) !important; }
+.bg-slate-800 {
+  background-color: var(--kinsol-green-800) !important;
+}
 
-.border-slate-800 { border-color: var(--kinsol-green-800) !important; }
-.border-slate-700 { border-color: var(--kinsol-green-700) !important; }
-.border-slate-300 { border-color: var(--kinsol-green-300) !important; }
+.bg-slate-700 {
+  background-color: var(--kinsol-green-700) !important;
+}
 
-.hover\:bg-slate-700:hover { background-color: var(--kinsol-green-700) !important; }
-.hover\:bg-slate-800:hover { background-color: var(--kinsol-green-800) !important; }
-.hover\:text-slate-300:hover { color: var(--kinsol-green-300) !important; }
+.bg-slate-600 {
+  background-color: var(--kinsol-green-600) !important;
+}
+
+.bg-slate-500 {
+  background-color: var(--kinsol-green-500) !important;
+}
+
+.bg-slate-100 {
+  background-color: #f0fdfa !important;
+}
+
+.bg-slate-50 {
+  background-color: #f9fefc !important;
+}
+
+.text-slate-900 {
+  color: var(--kinsol-green-900) !important;
+}
+
+.text-slate-800 {
+  color: var(--kinsol-green-800) !important;
+}
+
+.text-slate-700 {
+  color: var(--kinsol-green-700) !important;
+}
+
+.text-slate-600 {
+  color: var(--kinsol-green-600) !important;
+}
+
+.text-slate-500 {
+  color: var(--kinsol-green-700) !important;
+}
+
+.text-slate-400 {
+  color: var(--kinsol-green-400) !important;
+}
+
+.text-slate-300 {
+  color: var(--kinsol-green-300) !important;
+}
+
+.text-slate-200 {
+  color: var(--kinsol-green-200) !important;
+}
+
+.border-slate-800 {
+  border-color: var(--kinsol-green-800) !important;
+}
+
+.border-slate-700 {
+  border-color: var(--kinsol-green-700) !important;
+}
+
+.border-slate-300 {
+  border-color: var(--kinsol-green-300) !important;
+}
+
+.hover\:bg-slate-700:hover {
+  background-color: var(--kinsol-green-700) !important;
+}
+
+.hover\:bg-slate-800:hover {
+  background-color: var(--kinsol-green-800) !important;
+}
+
+.hover\:text-slate-300:hover {
+  color: var(--kinsol-green-300) !important;
+}
 
 /* Example: Override card hover effects */
 /*
@@ -600,3 +659,8 @@ body {
    ========================================================================== */
 
 /* Add your custom styles here */
+
+/* Override tailwind bg-slate-900\/60 */
+.bg-slate-900\/60 {
+  background-color: transparent;
+}
