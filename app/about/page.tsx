@@ -160,7 +160,7 @@ export default async function AboutPage() {
           </Badge>
           {aboutSettings?.getInTouchContent ? (
             <div
-              className="max-w-3xl mx-auto prose prose-invert prose-p:text-slate-300 prose-p:text-lg prose-a:text-blue-400 hover:prose-a:text-blue-300"
+              className="max-w-3xl mx-auto prose prose-invert prose-p:text-slate-300 prose-p:text-lg prose-a:text-slate-400 hover:prose-a:text-slate-300"
               dangerouslySetInnerHTML={{ __html: aboutSettings.getInTouchContent }}
             />
           ) : (

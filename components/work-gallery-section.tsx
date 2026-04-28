@@ -220,7 +220,7 @@ export function WorkGallerySection({ title, items, layoutType }: WorkGallerySect
                                     href={items[selectedIndex].link!}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-white hover:text-blue-300 underline underline-offset-4 flex items-center justify-center inline-flex"
+                                    className="text-white hover:text-slate-300 underline underline-offset-4 flex items-center justify-center inline-flex"
                                 >
                                     Visit Project Link <ExternalLink className="w-4 h-4 ml-2" />
                                 </a>
