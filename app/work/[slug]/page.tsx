@@ -246,7 +246,7 @@ export default async function FilmDetailPage({ params }: { params: { slug: strin
                       return (
                         <div key={index} className="flex flex-col sm:flex-row gap-2 sm:gap-6 pb-4 border-b border-white/10 last:border-0 last:pb-0">
                           {datetime && (
-                            <div className="flex-shrink-0 sm:w-32 text-lg font-light text-slate-300">
+                            <div className="flex-shrink-0 sm:w-32 text-lg font-light text-slate-300" suppressHydrationWarning>
                               {datetime.toLocaleString("en-US", {
                                 month: "2-digit",
                                 day: "2-digit",
