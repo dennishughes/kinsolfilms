@@ -19,9 +19,9 @@ export async function Footer() {
     const settings = await fetchEAMSettings()
     const socialLinks = settings?.socialLinks || []
     return (
-        <footer className="bg-slate-800 text-white py-8">
-            <div className="container mx-auto px-6">
-                <div className="flex justify-between items-center mb-6">
+        <footer className="bg-slate-800 text-white">
+            <div className="container mx-auto px-6 py-8">
+                <div className="flex justify-between items-center">
                     <FooterSubscribeForm />
 
                     <div className="flex space-x-4">
@@ -56,8 +56,13 @@ export async function Footer() {
                         )}
                     </div>
                 </div>
+            </div>
 
-                <div className="text-center text-slate-400 text-sm">© 2026 Kinsol Films. All rights reserved.</div>
+            {/* Copyright Bar */}
+            <div className="bg-slate-900 py-4">
+                <div className="container mx-auto px-6">
+                    <div className="text-center text-slate-400 text-sm">© 2026 Kinsol Films. All rights reserved.</div>
+                </div>
             </div>
         </footer>
     )
