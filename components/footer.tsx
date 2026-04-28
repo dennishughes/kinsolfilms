@@ -59,7 +59,7 @@ export async function Footer() {
             </div>
 
             {/* Copyright Bar */}
-            <div className="bg-slate-900 py-4">
+            <div className="bg-slate-800 py-4 border-t border-white/10">
                 <div className="container mx-auto px-6">
                     <div className="text-center text-slate-400 text-sm">© 2026 Kinsol Films. All rights reserved.</div>
                 </div>
