@@ -11,6 +11,7 @@ import {
     getUpcomingEvents,
     fetchWorks,
     fetchEAMSettings,
+    sortProductionsByYear,
     type Production,
 } from "@/lib/graphql"
 import { WorkGallerySection } from "@/components/work-gallery-section"
@@ -39,10 +40,10 @@ export default async function WorkPage({ searchParams }: WorkPageProps) {
     const workSettings = settings?.work
 
     // Compute full lists for tab visibility
-    const allOurProductions = getOurProductions(allProductions)
-    const allComingSoon = getComingSoonProductions(allProductions)
-    const allInProgress = getInProgressProductions(allProductions)
-    const allCollaborations = getCollaborations(allProductions)
+    const allOurProductions = sortProductionsByYear(getOurProductions(allProductions))
+    const allComingSoon = sortProductionsByYear(getComingSoonProductions(allProductions))
+    const allInProgress = sortProductionsByYear(getInProgressProductions(allProductions))
+    const allCollaborations = sortProductionsByYear(getCollaborations(allProductions))
 
     // Check if there are any design works
     const hasDesignWorks = worksData && (

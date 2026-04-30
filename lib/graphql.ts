@@ -727,6 +727,24 @@ export function getUpcomingEvents(productions: Production[]): UpcomingEvent[] {
   return events.sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime())
 }
 
+/**
+ * Sorts productions by release year, newest first.
+ */
+export function sortProductionsByYear(productions: Production[]): Production[] {
+  return [...productions].sort((a, b) => {
+    const yearA = parseInt(a.releaseYear || "0", 10)
+    const yearB = parseInt(b.releaseYear || "0", 10)
+    
+    // Sort by year descending (newest first)
+    if (yearB !== yearA) {
+      return yearB - yearA
+    }
+    
+    // Secondary sort by title if years are the same
+    return (a.title || "").localeCompare(b.title || "")
+  })
+}
+
 // --- Services ---
 
 export interface Service {
